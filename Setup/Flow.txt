@@ -1,0 +1,55 @@
+Service Desk:
+
+     Add Ticket:
+	CreatedBy
+	Priority
+	Area (Department(s))
+	Subject
+	Description
+	
+	Button: Create Ticket
+		Send to DB (Save)
+
+     Tickets:
+	Display:
+		Ticked ID
+		CreatedBy
+		CreatedTime
+		Subject
+		Description
+		AssignedTo
+		Status	
+
+    Ticket Details:
+	TicketId
+	CreatedBy
+	Priority
+	Area (Department(s))
+	CreatedTime
+	ClosedTime
+	Subject	
+	Description
+	AssignedTo
+	InternalComments
+
+	Button Save
+		Update/Save Details
+
+Model(s) Items
+	TickedId: AutoIncrement Int
+	CreatedBy: String
+	CreatedTime: DateTime
+	ClosedTime: DateTime
+	Priority Enum
+		Low
+		Medium
+		High
+	Area Enum (Department(s)) List<String>
+	Subject String
+	Description String	
+	AssignedTo String
+	Status Enum
+		InProgress
+		OnHold
+		Closed
+	AssignedTo List<String>

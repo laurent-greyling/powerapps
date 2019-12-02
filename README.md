@@ -2,7 +2,7 @@
 See how to connect power apps with azure services like queues, functions and and and
 
 ## Setup Environment
-To setup your environment, you need to `Import-Module New-Environment.psm1 -Force`. This will make available the powershell commands `Initialize-Environment` and `Set-KeyvaultSecrets`
+To setup your environment, you need to `Import-Module New-Environment.psm1 -Force` in folder called `Setup`. This will make available the powershell commands `Initialize-Environment` and `Set-KeyvaultSecrets`
 
 Install latest [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 

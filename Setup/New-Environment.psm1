@@ -24,7 +24,7 @@
         CreateResourceGroup `
         -ResourceGroupName $resourceGroupName
         
-        $keyvaultName = CreateKeyvault `
+        CreateKeyvault `
         -resourceGroupName $resourceGroupName `
         -basicName $basicName `
         -location $location
@@ -47,8 +47,119 @@
         
         CreateSqlServer -resourceGroupName $resourceGroupName `
         -basicName $basicName `
-        -location $location        
+        -location $location
+    }
+}
 
+#Add secrets to keyvault
+function Set-KeyvaultSecrets
+{
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $resourceGroupName,
+        [Parameter(Mandatory)]
+        [string]
+        $dbConnectionStringValue
+    )
+
+    $signedIn = SignIn
+
+    if($signedIn)
+    {        
+        $basicName = $resourceGroupName -replace '[^a-zA-Z0-9]', ''
+        $kvName = $basicName.ToLower() + "kv"
+        $storageKVName = "StorageConnectionString"
+        $dBKVName = "DbConnectionString"
+        $servicebusKVName = "SbConnectionString"
+        $appInsightsKVName = "InstrumentationKey"
+
+        Write-Host "Start adding secrets to Keyvault, be patient..." -ForegroundColor DarkYellow
+
+        $storageKvExists = az keyvault secret show `
+        --name $storageKVName `
+        --vault-name $kvName
+
+        if(!$storageKvExists)
+        {
+            Write-Host "Set storage details to Keyvault" -ForegroundColor Yellow
+            $storageName = $basicName.ToLower() + "storage"
+            $storageConnectionstring = az storage account show-connection-string `
+            -g $resourceGroupName `
+            -n $storageName `
+            --query connectionString
+        
+            az keyvault secret set `
+            --name $storageKVName `
+            --vault-name $kvName `
+            --value $storageConnectionstring
+            
+            Write-Host "Storage Done" -ForegroundColor Green
+        }  
+        
+        $dBKvExists = az keyvault secret show `
+        --name $dBKVName `
+        --vault-name $kvName
+        
+        if(!$dBKvExists)
+        {
+            Write-Host "Set DB details to Keyvault" -ForegroundColor Yellow
+            az keyvault secret set `
+            --name $dBKVName `
+            --vault-name $kvName `
+            --value $dbConnectionStringValue
+
+            Write-Host "Sql DB Done" -ForegroundColor Green
+        }   
+        
+        $sbKvExists = az keyvault secret show `
+        --name $servicebusKVName `
+        --vault-name $kvName  
+         
+        if(!$sbKvExists)
+        {
+            Write-Host "Set Servicebus details to Keyvault" -ForegroundColor Yellow
+            $nameSpaceName = $basicName.ToLower() + "servicebus"
+            $sfConnectionString = az servicebus namespace authorization-rule keys list `
+            --name RootManageSharedAccessKey `
+            --namespace-name $nameSpaceName `
+            --resource-group $resourceGroupName `
+            --query primaryConnectionString
+            
+            az keyvault secret set `
+            --name $servicebusKVName `
+            --vault-name $kvName `
+            --value $sfConnectionString
+
+            Write-Host "Servicebus Done" -ForegroundColor Green
+        }
+
+        #Install extention else App Insights wont work - this is in preview...
+        #az extension add --name application-insights
+
+        $appInsightsKvExists = az keyvault secret show `
+        --name $appInsightsKVName `
+        --vault-name $kvName
+
+        if(!$appInsightsKvExists)
+        {
+            #when function was created the app insights were created as function uses it, has the same name
+            $functionName = $basicName.ToLower() + "func"
+
+            Write-Host "Set Application Insights details to Keyvault" -ForegroundColor Yellow
+
+            $instrumentationKey = az monitor app-insights component show `
+            -g $resourceGroupName `
+            --app $functionName `
+            --query instrumentationKey
+
+            az keyvault secret set `
+            --name $appInsightsKVName `
+            --vault-name $kvName `
+            --value $instrumentationKey
+
+            Write-Host "App Insights Done" -ForegroundColor Green
+        }
     }
 }
 
@@ -118,7 +229,7 @@ function CreateFunction
         [string]$storageName
     )    
 
-    $functionName = $basicName.ToLower() + "function"
+    $functionName = $basicName.ToLower() + "func"
     Write-Host "Checking Function $functionName" -ForegroundColor Yellow
     $functionExists = az functionapp show `
     --name $functionName `
@@ -226,8 +337,7 @@ function CreateKeyvault
         --name $kvName `
         --resource-group $resourceGroupName
     }
-
-    return $kvName
 }
 
 Export-ModuleMember Initialize-Environment
+Export-ModuleMember Set-KeyvaultSecrets

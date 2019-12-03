@@ -273,12 +273,12 @@ function CreateServiceBus
         az servicebus queue create `
         --resource-group $resourceGroupName `
         --namespace-name $serviceBusNameSpace `
-        --name "users"
+        --name "management"
 
         az servicebus queue create `
         --resource-group $resourceGroupName `
         --namespace-name $serviceBusNameSpace `
-        --name "providers"
+        --name "worker"
     }
 }
 

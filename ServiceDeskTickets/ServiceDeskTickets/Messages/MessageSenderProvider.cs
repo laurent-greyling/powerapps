@@ -1,6 +1,5 @@
 ﻿using Microsoft.ServiceBus.Messaging;
 using ServiceDeskTickets.DependencyInjection;
-using ServiceDeskTickets.Settings;
 using System;
 
 namespace ServiceDeskTickets.Messages
@@ -14,8 +13,8 @@ namespace ServiceDeskTickets.Messages
 
         public MessageSenderProvider()
         {
-            var serviceBusConnectionString = new GetSecrets().GetServiceBusConnection().GetAwaiter();
-            var messagingFactory = MessagingFactory.CreateFromConnectionString(serviceBusConnectionString.GetResult());
+            var serviceBusConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsServiceBus");
+            var messagingFactory = MessagingFactory.CreateFromConnectionString(serviceBusConnectionString);
             _workToWorkMessageSender = new Lazy<IMessageSender>(() => new ServiceBusMessageSender(messagingFactory.CreateMessageSender("worker")));
             _managementToManagementMessageSender = new Lazy<IMessageSender>(() => new ServiceBusMessageSender(messagingFactory.CreateMessageSender("management")));
             _managementToWorkMessageSender = new Lazy<IMessageSender>(() => new ServiceBusMessageSender(messagingFactory.CreateMessageSender("worker", "management")));

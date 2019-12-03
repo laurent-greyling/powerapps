@@ -9,7 +9,7 @@ namespace ServiceDeskTickets
     public static class ServiceDeskFunction
     {
         [FunctionName("ServiceDeskFunction")]
-        public static async Task Run([ServiceBusTrigger("management")]BrokeredMessage message, ILogger log)
+        public static async Task Run([ServiceBusTrigger("management", Connection= "AzureWebJobsServiceBus")]BrokeredMessage message, ILogger log)
         {
             var messageHandler = await StartUp.GetMessageHandlerAsync();
             await messageHandler.HandleAsync(new BrokeredMessageWrapper(message));

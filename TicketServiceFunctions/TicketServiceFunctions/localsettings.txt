@@ -1,0 +1,10 @@
+﻿Create local.settings.json for local debugging
+
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+	"AzureWebJobsServiceBus": "connectionsstring"
+  }
+}

@@ -1,7 +1,7 @@
 ﻿Function New-SendTestMessage {
 
   $RestApiUri = 'https://<namespace>.servicebus.windows.net/management/messages'
-  $sasToken = New-SaSToken -ResourceUri $RestApiUri -SasKeyName RootManageSharedAccessKey -SasKey "<seervicebus Key>"
+  $sasToken = New-SaSToken -ResourceUri $RestApiUri -SasKeyName RootManageSharedAccessKey -SasKey "<key>"
   $headers = @{'Authorization'= $sasToken}
 
   $json = @{
